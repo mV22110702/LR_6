@@ -22,6 +22,8 @@ namespace LR_6.Controllers
                 VegetablePizza
         };
 
+        private string AgeErrorMessage = "You must be at least 17 years old to create an order";
+
         [HttpGet]
         public ViewResult Index()
         {
@@ -31,19 +33,27 @@ namespace LR_6.Controllers
         [HttpGet("/order-details")]
         public ViewResult OrderDetails([FromQuery] OrderFirstStageRequestDto orderFirstStageRequestDto)
         {
+            if (orderFirstStageRequestDto.User.Age <= 16)
+            {
+                return View("Views/Home/Error.cshtml", new Error() { Message = AgeErrorMessage });
+            }
             var orderSecondStageInitialDto = new OrderSecondStageInitialDto()
             {
                 AvailableProducts = HomeController.AvailableProductsMock,
                 FirstStageOrderData = orderFirstStageRequestDto
             };
 
-            return View("Views/Order/OrderDetails.cshtml", orderSecondStageInitialDto);
+            return View("Views/Home/OrderDetails.cshtml", orderSecondStageInitialDto);
         }
 
         [HttpGet("/order-result")]
         public ViewResult OrderResult([FromQuery] Order order)
         {
-            return View("Views/Order/OrderResult.cshtml", order);
+            if (order.User.Age <= 16)
+            {
+                return View("Views/Home/Error.cshtml", new Error() { Message = AgeErrorMessage });
+            }
+            return View("Views/Home/OrderResult.cshtml", order);
         }
     }
 }
