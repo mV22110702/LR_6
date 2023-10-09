@@ -1,0 +1,72 @@
+﻿@using LR_6.Models;
+@using LR_6.Models.Order;
+@model Order
+@{
+    var generalTotal = 0d;
+}
+@if(Model.User.Age <= 16)
+{
+    <h1>You must be older than 16 to order a pizza</h1>
+    return;
+}
+
+<style>
+    table{
+        table-layout: fixed;
+        border-collapse: collapse;
+        text-align:center;
+        border: 2px solid black;
+    }
+    th,td{
+        padding:10px;
+        border: 2px solid black;
+    }
+</style>
+<h1>Order result:</h1>
+<table>
+    <h2>Name: @Model.User.Name</h2>
+    <h2>Age: @Model.User.Age</h2>
+    <h2>Ordered Products:</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    Name
+                </th>
+                <th>
+                    Price
+                </th>
+                <th>
+                    Quantity
+                </th>
+                <th>
+                    Total Price
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model.OrderedProducts)
+            {
+                var productTotal = product.Price * product.Quantity;
+                generalTotal += productTotal;
+                <tr>
+                    <td>@product.Name</td>
+                    <td>@product.Price</td>
+                    <td>@product.Quantity</td>
+                    <td>@productTotal.ToString("N2")</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan ="3">
+                    In total:
+                </th>
+                <th >
+                    @generalTotal.ToString("N2")
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</table>
+

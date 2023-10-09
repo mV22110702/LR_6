@@ -1,0 +1,94 @@
+﻿@using LR_6.Models
+@using System.Text.Json;
+@using LR_6.ViewModels;
+@model OrderSecondStageInitialDto;
+@{
+    var DBProductsJSON = JsonSerializer.Serialize(Model.AvailableProducts);
+}
+
+@if(Model.FirstStageOrderData.User.Age <= 16)
+{
+    <h1>You must be older than 16 to order a pizza</h1>
+    return;
+}
+
+<h1>Hello, @Model.FirstStageOrderData.User.Name</h1>
+<form method="get" action="/order-result" target="_self">
+    @for (int i = 0; i < Model.FirstStageOrderData.NumOrderedProducts; i++)
+    {
+        <fieldset >
+            <legend> Product #@(i + 1)</legend>
+            <select id="orderedProducts[@i].id" name="orderedProducts[@i].id" onchange="handleIdChange(event,@i)">
+                <option value="-1" selected>Select product</option>
+                @foreach(var dbProduct in Model.AvailableProducts)
+                {
+                    <option value="@dbProduct.Id">@dbProduct.Name ($@dbProduct.Price)</option>
+                }
+            </select>
+            <br />
+            <label for="orderedProducts[@i].quantity"> Quantity: </label>
+            <br />
+            <input type="number" onchange="handleQuantityChange(event,@i)" min="1" step="1" value="1" id="orderedProducts[@i].quantity" name="orderedProducts[@i].quantity" />
+            <br />
+            <p id="orderedProducts[@i].total" hidden></p>
+            <input type="text" id="orderedProducts[@i].name" name="orderedProducts[@i].name" hidden/>
+            <input type="text" id="orderedProducts[@i].price" name="orderedProducts[@i].price" hidden/>
+        </fieldset>
+    }
+    <h2 id="total"></h2>
+    <input type="submit" id="submitBtn" disabled value="Confirm order" />
+    <input type="text" name="user.name" value="@Model.FirstStageOrderData.User.Name" hidden />
+    <input type="text" name="user.age" value="@Model.FirstStageOrderData.User.Age" hidden />
+</form>
+
+<script>
+    const DBProducts = JSON.parse('@Html.Raw(DBProductsJSON)');
+
+    const generalTotalParagraph = document.getElementById('total');
+    const submitBtn = document.getElementById('submitBtn');
+    const chosenProductIndexes = new Map();
+
+    const updateTotalParagraph = (chosenDBProductId,quantity,index)=>{
+        const totalParagraph = document.getElementById(`orderedProducts[${index}].total`);
+        if(chosenDBProductId === -1){
+            chosenProductIndexes.delete(index);
+            submitBtn.disabled = chosenProductIndexes.size !== @Model.FirstStageOrderData.NumOrderedProducts;
+            totalParagraph.hidden = true;
+            generalTotalParagraph.hidden = chosenProductIndexes.size === 0;
+            return;
+        }
+        
+        const chosenDBProduct = DBProducts.find((product)=>product.Id === chosenDBProductId);
+        if(!chosenDBProduct){
+            return;
+        }
+        const productNameInput = document.getElementById(`orderedProducts[${index}].name`);
+        productNameInput.value = chosenDBProduct.Name;
+        const productPriceInput = document.getElementById(`orderedProducts[${index}].price`);
+        productPriceInput.value = chosenDBProduct.Price;
+
+        const productTotal = chosenDBProduct.Price * quantity;
+        chosenProductIndexes.set(index,productTotal);
+        totalParagraph.textContent = `$${productTotal.toFixed(2)}`;
+        
+        const generalTotal = Array.from(chosenProductIndexes.values()).reduce((partialSum, a) => partialSum + a, 0);
+        generalTotalParagraph.textContent = `Total: $${generalTotal.toFixed(2)}`;
+        totalParagraph.hidden=false;
+        generalTotalParagraph.hidden = false;
+        submitBtn.disabled = chosenProductIndexes.size !== @Model.FirstStageOrderData.NumOrderedProducts;
+
+    }
+
+    const handleIdChange = (event, index) => {
+        const chosenDBProductId = +(event.target.value);
+        const quantity = +(document.getElementById(`orderedProducts[${index}].quantity`).value);
+        
+        updateTotalParagraph(chosenDBProductId, quantity, index);
+    }
+
+    const handleQuantityChange = (event,index)=>{
+        const chosenDBProductId = +(document.getElementById(`orderedProducts[${index}].id`).value);
+        const quantity = +(event.target.value);
+        updateTotalParagraph(chosenDBProductId, quantity, index);
+    }
+</script>

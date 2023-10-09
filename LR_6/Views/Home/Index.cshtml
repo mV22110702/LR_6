@@ -1,0 +1,42 @@
+﻿@using LR_6.Models
+
+<form onsubmit="handleFormSubmit" target="_self" onchange="handleFormChange()" method="get" action="/order-details">
+    <label for="#user.name">
+        Your Name:
+    </label>
+    </br>
+    <input type="text" id="user.name" name="user.name" min="2" />
+    </br>
+    <label for="#user.age">
+        Your Age:
+    </label>
+    </br>
+    <input type="number" min="1" step="1" id="user.age" name="user.age" />
+    </br>
+    <div id="chooseNumProductsStage" hidden>
+        <label for="#numProducts">
+            Number of products:
+        </label>
+        </br>
+        <input type="number" min="1" step="1" value="1" id="numOrderedProducts" name="numOrderedProducts" />
+        </br>
+        <input id="submitBtn" type="submit" value="Proceed" />
+    </div>
+</form>
+
+<script>
+    const chooseNumProductsStageDiv = document.getElementById('chooseNumProductsStage');
+    const submitBtn = document.getElementById('submitBtn');
+    const handleFormChange = () => {
+        const customerName = document.getElementById('user.name')?.value;
+        const customerAge = +(document.getElementById('user.age')?.value);
+        const numProducts = +(document.getElementById('numOrderedProducts')?.value);
+        if (customerName.trim().length < 2 || customerAge <= 16) {
+            chooseNumProductsStageDiv.hidden = true;
+        }
+        else {
+            chooseNumProductsStageDiv.hidden = false;
+            submitBtn.disabled = numProducts <= 0;
+        }
+        }
+</script>
