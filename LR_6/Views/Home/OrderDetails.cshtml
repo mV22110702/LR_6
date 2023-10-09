@@ -7,7 +7,7 @@
 }
 
 <h1>Hello, @Model.FirstStageOrderData.User.Name</h1>
-<form method="get" action="/order-result" target="_self">
+<form method="post" action="/order-result" target="_self">
     @for (int i = 0; i < Model.FirstStageOrderData.NumOrderedProducts; i++)
     {
         <fieldset >

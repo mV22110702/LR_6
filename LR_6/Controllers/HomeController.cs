@@ -30,8 +30,8 @@ namespace LR_6.Controllers
             return View();
         }
 
-        [HttpGet("/order-details")]
-        public ViewResult OrderDetails([FromQuery] OrderFirstStageRequestDto orderFirstStageRequestDto)
+        [HttpPost("/order-details")]
+        public ViewResult OrderDetails([FromForm] OrderFirstStageRequestDto orderFirstStageRequestDto)
         {
             if (orderFirstStageRequestDto.User.Age <= 16)
             {
@@ -46,8 +46,8 @@ namespace LR_6.Controllers
             return View("Views/Home/OrderDetails.cshtml", orderSecondStageInitialDto);
         }
 
-        [HttpGet("/order-result")]
-        public ViewResult OrderResult([FromQuery] Order order)
+        [HttpPost("/order-result")]
+        public ViewResult OrderResult([FromForm] Order order)
         {
             if (order.User.Age <= 16)
             {
